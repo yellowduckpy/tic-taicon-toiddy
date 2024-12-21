@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Velha</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #fff;
+      border: 2px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cell img {
+      width: 80%;
+      height: 80%;
+    }
+    .winner {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    .restart-btn {
+      margin-top: 60px;
+      margin: auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      color: #fff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .restart-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body style="background-color: #6858ae;">
+  <h1 style="color: #fff;">Tic Taicon Toiddy</h1>
+  <div class="container">
+    <div class="board" id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+  </div>
+  <div class="winner" id="winner"></div>
+  <button class="restart-btn" id="restartBtn" style="display: none;">Reiniciar</button>
+
+  <!-- Sons de vitória -->
+  <audio id="xSound" src="x-sound.mp3"></audio>
+  <audio id="oSound" src="o-sound.mp3"></audio>
+
+  <script>
+    const board = document.getElementById('board');
+    const winnerText = document.getElementById('winner');
+    const restartBtn = document.getElementById('restartBtn');
+    const xSound = document.getElementById('xSound');
+    const oSound = document.getElementById('oSound');
+
+    const xImgSrc = 'Maico.png'; // Caminho para a imagem local do X
+    const oImgSrc = 'p diddy.png'; // Caminho para a imagem local do O
+
+    let currentPlayer = 'X';
+    let gameState = Array(9).fill(null);
+
+    const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    function checkWinner() {
+      for (const combination of winningCombinations) {
+        const [a, b, c] = combination;
+        if (
+          gameState[a] &&
+          gameState[a] === gameState[b] &&
+          gameState[a] === gameState[c]
+        ) {
+          return gameState[a];
+        }
+      }
+      return null;
+    }
+
+    function isBoardFull() {
+      return gameState.every(cell => cell !== null);
+    }
+
+    function handleClick(event) {
+      const cell = event.target;
+      const index = cell.dataset.index;
+
+      if (gameState[index] || checkWinner()) return;
+
+      gameState[index] = currentPlayer;
+
+      const img = document.createElement('img');
+      img.src = currentPlayer === 'X' ? xImgSrc : oImgSrc;
+      cell.appendChild(img);
+
+      const winner = checkWinner();
+      if (winner) {
+        
+        if (winner === 'X') {
+            winnerText.textContent = `O Maico Venceu Whooooaall venceu!`;
+          xSound.play();
+        } else {
+            winnerText.textContent = `O Pididdy ganhou e vai dar uma festa pra comemorar🥳🥳🍼🍼`;
+          oSound.play();
+        }
+        endGame();
+        return;
+      }
+
+      if (isBoardFull()) {
+        winnerText.textContent = "Empatou!";
+        endGame();
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+
+    function endGame() {
+      board.removeEventListener('click', handleClick);
+      restartBtn.style.display = 'block';
+    }
+
+    function restartGame() {
+      gameState.fill(null);
+      currentPlayer = 'X';
+      winnerText.textContent = '';
+      restartBtn.style.display = 'none';
+      Array.from(board.children).forEach(cell => (cell.innerHTML = ''));
+      board.addEventListener('click', handleClick);
+    }
+
+    board.addEventListener('click', handleClick);
+    restartBtn.addEventListener('click', restartGame);
+  </script>
+</body>
+</html>
